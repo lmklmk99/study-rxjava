@@ -5,10 +5,7 @@ import com.smp.rxplayround.BasePlayground;
 import org.junit.Test;
 
 import lombok.extern.slf4j.Slf4j;
-import rx.Observable;
 import rx.Observer;
-import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
 
 /**
  * Created by myungpyo.shim on 2016. 4. 25..

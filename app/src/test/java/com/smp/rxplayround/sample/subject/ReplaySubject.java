@@ -6,8 +6,6 @@ import org.junit.Test;
 
 import lombok.extern.slf4j.Slf4j;
 import rx.Observer;
-import rx.subjects.BehaviorSubject;
-import rx.subjects.ReplaySubject;
 
 /**
  * Created by myungpyo.shim on 2016. 4. 25..
