@@ -1,4 +1,4 @@
-package com.smp.rxplayround.sample;
+package com.smp.rxplayround.sample.operator.combine;
 
 import com.smp.rxplayround.BasePlayground;
 
@@ -9,9 +9,6 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import rx.Observable;
 import rx.Observer;
-import rx.Subscriber;
-import rx.functions.Action1;
-import rx.functions.Func0;
 
 /**
  * Created by Minku on 2016. 5. 24..

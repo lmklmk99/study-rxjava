@@ -5,41 +5,41 @@ import com.smp.rxplayround.BasePlayground;
 
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
+
 import lombok.extern.slf4j.Slf4j;
 import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Func1;
+import rx.Observer;
 import rx.schedulers.Schedulers;
-
-import static junit.framework.Assert.assertTrue;
 
 /**
  * Created by Minku on 2016. 5. 25..
  */
 @Slf4j
 public class Immediate extends BasePlayground {
+
     @Test
-    public final void play() throws Exception {
+    public void play() throws Exception {
+        Observable<String> observable1 = Observable.just("A", "B", "C", "D", "E");
 
-        final String currentThreadName = Thread.currentThread().getName();
+        observable1.subscribeOn(Schedulers.immediate())
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onCompleted() {
+                        log.debug("onCompleted");
+                    }
 
-        Observable<Integer> o1 = Observable.just(1, 2, 3, 4, 5);
-        Observable<Integer> o2 = Observable.just(6, 7, 8, 9, 10);
-        Observable<String> o = Observable.merge(o1, o2).subscribeOn(Schedulers.immediate()).map(new Func1<Integer, String>() {
+                    @Override
+                    public void onError(Throwable e) {
+                        log.debug("onError");
+                    }
 
-            @Override
-            public String call(Integer t) {
-                assertTrue(Thread.currentThread().getName().equals(currentThreadName));
-                return "Value_" + t + "_Thread_" + Thread.currentThread().getName();
-            }
-        });
+                    @Override
+                    public void onNext(String s) {
+                        log.debug("onNext : " + s);
 
-        o.toBlocking().forEach(new Action1<String>() {
+                    }
+                });
 
-            @Override
-            public void call(String t) {
-                System.out.println("t: " + t);
-            }
-        });
     }
 }

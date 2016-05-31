@@ -1,4 +1,4 @@
-package com.smp.rxplayround.sample;
+package com.smp.rxplayround.sample.operator.combine;
 
 import com.smp.rxplayround.BasePlayground;
 

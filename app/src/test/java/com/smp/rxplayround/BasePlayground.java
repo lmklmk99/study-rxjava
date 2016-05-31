@@ -13,7 +13,7 @@ public abstract class BasePlayground {
     private CountDownLatch lock;
 
     protected void waitForObservable() {
-        lock = new CountDownLatch(1);
+        waitForObservable(1);
     }
     protected void waitForObservable(int count) {
         lock = new CountDownLatch(count);

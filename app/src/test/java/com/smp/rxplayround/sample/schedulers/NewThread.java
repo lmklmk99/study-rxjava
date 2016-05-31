@@ -2,62 +2,73 @@ package com.smp.rxplayround.sample.schedulers;
 
 import com.smp.rxplayround.BasePlayground;
 
-import junit.framework.Assert;
-
 import org.junit.Test;
 
-import lombok.extern.slf4j.Slf4j;
-import rx.Scheduler;
-import rx.functions.Action0;
-import rx.internal.schedulers.ScheduledAction;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.Subscriptions;
+import java.util.concurrent.TimeUnit;
 
-import java.util.concurrent.CountDownLatch;
-import 	java.util.concurrent.atomic.AtomicReference;
-import 	java.util.concurrent.atomic.AtomicBoolean;
+import lombok.extern.slf4j.Slf4j;
+import rx.Observable;
+import rx.Observer;
+import rx.functions.Action0;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by Minku on 2016. 5. 25..
  */
 @Slf4j
 public class NewThread extends BasePlayground {
-    @Test(timeout = 3000)
-    public void play() throws InterruptedException {
-        Scheduler.Worker worker = Schedulers.newThread().createWorker();
-        try {
-            final CountDownLatch run = new CountDownLatch(1);
-            final CountDownLatch done = new CountDownLatch(1);
-            final AtomicReference<Throwable> exception = new AtomicReference<Throwable>();
-            final AtomicBoolean interruptFlag = new AtomicBoolean();
+    @Test
+    public void play() throws Exception {
+        final String[] convert = {"A", "B", "C", "D", "E"};
+        final Observable<Long> observable1 = Observable.interval(50, TimeUnit.MILLISECONDS).take(5);
+        Observable<Long> observable2 = Observable.interval(100, TimeUnit.MILLISECONDS).take(5);
 
-            ScheduledAction sa = (ScheduledAction) worker.schedule(new Action0() {
-                @Override
-                public void call() {
-                    try {
-                        run.await();
-                    } catch (InterruptedException ex) {
-                        exception.set(ex);
+        Schedulers.newThread().createWorker().schedule(new Action0() {
+            @Override
+            public void call() {
+                observable1.subscribeOn(Schedulers.io())
+                        .subscribe(new Observer<Long>() {
+                            @Override
+                            public void onCompleted() {
+                                log.debug("onCompleted");
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                log.debug("onError");
+                            }
+
+                            @Override
+                            public void onNext(Long s) {
+                                log.debug("onNext : " + convert[s.intValue()]);
+
+                            }
+                        });
+            }
+        }, 130, TimeUnit.MILLISECONDS);
+
+
+        observable2
+                .subscribe(new Observer<Long>() {
+                    @Override
+                    public void onCompleted() {
+                        log.debug("onCompleted");
+                        stopWaitingForObservable();
                     }
-                }
-            });
 
-            sa.add(Subscriptions.create(new Action0() {
-                @Override
-                public void call() {
-                    interruptFlag.set(Thread.currentThread().isInterrupted());
-                    done.countDown();
-                }
-            }));
+                    @Override
+                    public void onError(Throwable e) {
+                        log.debug("onError");
+                        stopWaitingForObservable();
+                    }
 
-            run.countDown();
+                    @Override
+                    public void onNext(Long aLong) {
+                        log.debug("onNext : " + aLong);
+                    }
+                });
 
-            done.await();
+        waitForObservable();
 
-            Assert.assertEquals(null, exception.get());
-            Assert.assertFalse("Interrupted?!", interruptFlag.get());
-        } finally {
-            worker.unsubscribe();
-        }
     }
 }

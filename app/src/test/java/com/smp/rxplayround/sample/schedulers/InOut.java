@@ -4,13 +4,12 @@ import com.smp.rxplayround.BasePlayground;
 
 import org.junit.Test;
 
+import java.util.concurrent.TimeUnit;
+
 import lombok.extern.slf4j.Slf4j;
 import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Func1;
+import rx.Observer;
 import rx.schedulers.Schedulers;
-
-import static junit.framework.Assert.assertTrue;
 
 /**
  * Created by Minku on 2016. 5. 25..
@@ -20,24 +19,29 @@ public class InOut extends BasePlayground {
 
     @Test
     public void play() throws Exception {
+        Observable<String> observable1 = Observable.just("A", "B", "C", "D", "E");
 
-        Observable<Integer> o1 = Observable.just(1, 2, 3, 4, 5);
-        Observable<Integer> o2 = Observable.just(6, 7, 8, 9, 10);
-        Observable<String> o = Observable.merge(o1, o2).map(new Func1<Integer, String>() {
+        observable1.subscribeOn(Schedulers.io())
+                .subscribe(new Observer<String>() {
+                    @Override
+                    public void onCompleted() {
+                        log.debug("onCompleted");
+                        stopWaitingForObservable();
+                    }
 
-            @Override
-            public String call(Integer t) {
-                return "Value_" + t + "_Thread_" + Thread.currentThread().getName();
-            }
-        });
+                    @Override
+                    public void onError(Throwable e) {
+                        log.debug("onError");
+                        stopWaitingForObservable();
+                    }
 
-        o.subscribeOn(Schedulers.io()).toBlocking().forEach(new Action1<String>() {
+                    @Override
+                    public void onNext(String s) {
+                        log.debug("onNext : " + s);
 
-            @Override
-            public void call(String t) {
-                System.out.println("t: " + t);
-            }
-        });
+                    }
+                });
 
+        waitForObservable();
     }
 }
